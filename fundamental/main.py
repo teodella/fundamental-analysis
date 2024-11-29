@@ -4,6 +4,26 @@ from fundamental import company_financials as financials
 from fundamental import company_fundamentals as fundamentals
 
 import pandas as pd
+import requests
+
+def get_index_tickers(index_symbol, api_key):
+    """
+    Retrieve all stock tickers for a given index (e.g., SPY, IWB for Russell 3000).
+
+    :param index_symbol: Symbol of the ETF representing the index (e.g., SPY, IWB).
+    :param api_key: FinancialModelingPrep API key.
+    :return: List of tickers in the index.
+    """
+    url = f"https://financialmodelingprep.com/api/v3/etf-holder/{index_symbol}?apikey={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        tickers = [item['asset'] for item in data]
+        print(f"Retrieved {len(tickers)} tickers from {index_symbol}.")
+        return tickers
+    else:
+        print(f"Failed to retrieve tickers for {index_symbol}. Status code: {response.status_code}")
+        return []
 
 
 def prepare_company_profiles(price_filter, dir_path, api_key):
@@ -150,31 +170,32 @@ def calculate_intrinsic_value(df, report_year, eval_period, projection_window,
     return valuation_data
 
 
-if __name__ == '__main__':
 
-    prepare_company_profiles(10.00, 'data/', config.api_key)
 
-    financial_requests = ['financials', 'financial-ratios', 'financial-statement-growth',
-                          'company-key-metrics', 'enterprise-value']
 
-    get_company_financials('data/company-profiles.csv', financial_requests, 'annual', 2019, 10,
-                           'data/', config.api_key)
+prepare_company_profiles(100.00, 'data/', config.apikey)
 
-    screening_criteria = {'debtToEquity': [0, 0.5],
-                          'currentRatio': [1.5, 10.0],
-                          'roe': [0.10, 0.50],
-                          '10Y roe median': [0.08, 0.25],
-                          'interestCoverage': [15, 5000]}
+financial_requests = ['financials', 'financial-ratios', 'financial-statement-growth',
+                        'company-key-metrics', 'enterprise-value']
 
-    screened_stocks = screen_stocks('data/', '10Y', 2019, 10, screening_criteria, 'median',
-                                    'roe', 'currentRatio')
+get_company_financials('data/company-profiles.csv', financial_requests, 'annual', 2019, 10,
+                        'data/', config.api_key)
 
-    # Returns list of ggplot objects, add optional for loop to inspect graphs
-    stability_graphs = plot_stock_performance(screened_stocks, 2019, 10)
+screening_criteria = {'debtToEquity': [0, 0.5],
+                        'currentRatio': [1.5, 10.0],
+                        'roe': [0.10, 0.50],
+                        '10Y roe median': [0.08, 0.25],
+                        'interestCoverage': [15, 5000]}
 
-    stock_growth_estimates = {'DLB': 0.06, 'UNF': 0.05}
+screened_stocks = screen_stocks('data/', '10Y', 2019, 10, screening_criteria, 'median',
+                                'roe', 'currentRatio')
 
-    intrinsic_value_estimates = calculate_intrinsic_value(screened_stocks, 2019, 10, 10,
-                                                          stock_growth_estimates, 'DLB', 'UNF')
+# Returns list of ggplot objects, add optional for loop to inspect graphs
+stability_graphs = plot_stock_performance(screened_stocks, 2019, 10)
 
-    print(intrinsic_value_estimates)
+stock_growth_estimates = {'DLB': 0.06, 'UNF': 0.05}
+
+intrinsic_value_estimates = calculate_intrinsic_value(screened_stocks, 2019, 10, 10,
+                                                        stock_growth_estimates, 'DLB', 'UNF')
+
+print(intrinsic_value_estimates)

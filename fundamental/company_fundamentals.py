@@ -238,7 +238,7 @@ def prepare_valuation_inputs(df, report_year, eval_period, *args):
     return valuation_data
 
 
-def calculate_discount_rate(df, risk_free_rate=0.0069, market_risk_premium=0.06):
+def calculate_discount_rate(df, risk_free_rate=0.04, market_risk_premium=0.06):
     """
     Calculate the Weighted Average Cost of Capital (WACC) for each ticker in the provided DataFrame.
 
@@ -345,7 +345,7 @@ def calculate_intrinsic_value(df):
     return df
 
 
-def calculate_margin_of_safety(df, margin_of_safety=0.25):
+def calculate_margin_of_safety(df, margin_of_safety=0.2):
     """
     Calculate the margin of safety value of each stock ticker in the provided DataFrame.
 
